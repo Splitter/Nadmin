@@ -1,0 +1,28 @@
+doctype html
+html( lang="en" )  
+    head
+        //- all head data including CSS includes
+        include ./includes/auth-head
+
+    body
+        main.container(role='main')
+            .card.card-container
+                p.profile-name-card Account recovery
+                i.fas.fa-user-shield.profile-img-card 
+
+                if(error)
+                    div.error-box= error
+                if(success)
+                    div.success-box= success
+
+                form.nadmin-form(action="/forgotpassword", method="post")
+                    span#reauth-email.reauth-email
+                    input#inputEmail.form-control(type='email', name='email' placeholder='Email address', required='', autofocus='')
+                    button.btn.btn-lg.btn-primary.btn-block.btn-signin(type='submit') Reset Now
+                // /form
+                // /card-container
+
+        // /.container
+
+    //- all head data including CSS includes
+    include ./includes/auth-foot

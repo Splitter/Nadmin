@@ -1,0 +1,38 @@
+doctype html
+html( lang="en" )  
+    head
+        //- all head data including CSS includes
+        include ./includes/auth-head
+
+    body
+        main.container(role='main')
+            .card.card-container
+             
+                p.profile-name-card Sign In
+                i.fas.fa-user-circle.profile-img-card   
+
+                if(errors)
+                    div.error-box
+                        ul
+                        each name, data in errors
+                            li= name
+                if(success)
+                    div.success-box= success
+                    
+                form.nadmin-form(action="/login", method="post")
+                    input#email.form-control(type='email', name='email', placeholder='Email address', required='', autofocus='')
+                    input#password.form-control(type='password', name='password', placeholder='Password', required='')
+                    #remember.checkbox
+                    label
+                        input(name='remember', type='checkbox', value='remember-me')
+                        |  Remember me
+                    button.btn.btn-lg.btn-primary.btn-block.btn-signin(type='submit') Sign in
+                // /form
+                a.form-link(href='/forgotpassword')
+                    | Forgot the password?
+                // /card-container
+
+    // /.container
+
+    //- all head data including CSS includes
+    include ./includes/auth-foot

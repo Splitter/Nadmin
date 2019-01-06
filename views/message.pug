@@ -1,0 +1,21 @@
+doctype html
+html( lang="en" )  
+    head
+        //- all head data including CSS includes
+        include ./includes/auth-head
+
+    body
+        main.container(role='main')
+            .card.card-container          
+                if(error)
+                    div.error-box= error
+
+                if(success)
+                    div.success-box= success
+                    
+                // /card-container
+
+    // /.container
+
+    //- all head data including CSS includes
+    include ./includes/auth-foot

@@ -1,0 +1,35 @@
+doctype html
+html( lang="en" )  
+    head
+        //- all head data including CSS includes
+        include ./includes/auth-head
+
+    body
+        main.container(role='main')
+            .card.card-container
+                p.profile-name-card Register
+                i.fas.fa-user-cog.profile-img-card
+                    
+                if(errors)
+                    div.error-box
+                        ul
+                        each name, data in errors
+                            li= name
+
+                if(success)
+                    div.success-box= success
+                form.nadmin-form(action="/register", method="post")
+                    input#displayname.form-control(type='text', name='displayname', placeholder='Your Name', required='', autofocus='')
+                    input#email.form-control(type='email', name='email', placeholder='Email Address', required='', autofocus='')
+                    input#confirmEmail.form-control(type='email', name='confirmEmail', placeholder='Confirm Email', required='')
+                    input#password.form-control(type='password', name='password', placeholder='Password', required='')
+                    input#confirmPassword.form-control(type='password', name='confirmPassword', placeholder='Confirm Password', required='')
+                    button.btn.btn-lg.btn-primary.btn-block.btn-signin(type='submit') Register
+                // /form
+                a.form-link(href='/login')
+                    | Already a member? Login here
+            // /card-container
+
+        // /.container
+    //- all head data including CSS includes
+    include ./includes/auth-foot
