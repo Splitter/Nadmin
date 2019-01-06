@@ -9,6 +9,6 @@ Goal is to become an adminstration interface for Node/Express/Mongoose based web
 User management/authentication
 - supports register, sign in, sign out and password reset
 - uses bcrypt encryption on password/token storage
-- crypto randomly generated token for reset(with expiration and hashed storage of token)
-- express-brute to rate limit login attempts
+- crypto module to randomly generate token for reset(with expiration and hashed storage of token)
+- express-brute module to rate limit login attempts
 - TODO: use Handle module to secure headers
