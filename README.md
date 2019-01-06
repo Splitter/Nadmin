@@ -1,5 +1,5 @@
 # nadmin
-Goal is to become an adminstration interface for Express/Mongoose based websites similar in fashion to Lumber or Keystone
+Goal is to become an adminstration interface for Node,Express/Mongoose based websites similar in fashion to Lumber or Keystone
 
 
 ![enter image description here](https://raw.githubusercontent.com/Splitter/nadmin/master/preview.png)
