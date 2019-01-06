@@ -4,7 +4,10 @@ const   mongoose        = require('mongoose'),
         expressValidator= require('express-validator'),
         session         = require('express-session'),
         mongoStore      = require('connect-mongo')(session),
-        appRoot         = require('app-root-path')
+        appRoot         = require('app-root-path'),
+        expressBrute    = require('express-brute'),
+        mongBruteStore  = require('express-brute-mongoose'),
+        mongBruteSchema = require('express-brute-mongoose/dist/schema')
         
 const   page            = require("./controllers/page"),
         register        = require("./controllers/register"),
@@ -13,8 +16,17 @@ const   page            = require("./controllers/page"),
         sessionManager  = require("./controllers/sessionManager"),
         utilities       = require("./utilities")
 
+//Make mongoose use newer native driver api's and get rid of depreciation warnings
 mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true);
 
+//setup rate limiter for login page
+const loginLimitStore = new mongBruteStore(mongoose.model( 'loginRateLimiter', mongBruteSchema ))        
+const loginRateLimiter = new expressBrute(loginLimitStore, {
+    freeRetries: 5,
+    minWait: 5*60*1000, // 5 minutes
+    maxWait: 60*60*1000 // 1 hour
+});
 
 //Main Nadmin middleware
 const nadmin = (app, options = {} ) =>{
@@ -25,7 +37,7 @@ const nadmin = (app, options = {} ) =>{
         sessionSecret   : "$2b$12$wuJPlBlIRh2SXt18AwbBDOjuh5xPNniStXzTcrytS/Y1aF/zlVyuK",
         sessionExpire   : 4, //days
         emailOptions   : {
-            from: 'mwpippin@gmail.com',
+            from: 'yourname@gmail.com',
             host: 'smtp.gmail.com',
             port: 465,
             secure: true,
@@ -41,7 +53,6 @@ const nadmin = (app, options = {} ) =>{
     app.use(bodyParser.urlencoded({extended: true}))
     app.use(bodyParser.json())
     app.use(expressValidator())
-
     //setup session
     app.use(session({
         store: new mongoStore( { 
@@ -92,7 +103,7 @@ const nadmin = (app, options = {} ) =>{
         })        
 
         //route session routes
-        req.app.use(["/login" , "/signin"] , (req,res)=>{
+        req.app.use(["/login" , "/signin"] , loginRateLimiter.prevent, (req,res)=>{
             //if logged in then do not allow logging in again
             if(req.session.isLoggedIn()){
                 error = "You are already logged in!"
