@@ -8,7 +8,8 @@ const   resetToken    = require("../models/resetToken")
 const   recovery= express.Router()
 
 //Internal Error statement
-const   serverErrorStatement = "There was an error in your request. Please try again later."
+const   serverErrorStatement = "There was an error in your request. Please try again later.",
+        generalErrorStatement= "Invalid attempt at password reset, if you followed a link it may have expired"
 
 recovery.get("/", (req, res) => {
     if(!req.query.reset){                     
@@ -19,8 +20,7 @@ recovery.get("/", (req, res) => {
         if ( err ){                                
             return res.status(500).send(serverErrorStatement)
         }   
-        //since bcript compare is asyncronous keep a count of current index into tokens results
-        //in order to render error page(if need be) after last token is checked inside bcrypt.compare callback
+        
         let count = 0
         let foundToken = false
         if(tokens.length){
@@ -43,7 +43,7 @@ recovery.get("/", (req, res) => {
                     }
                     if(!foundToken && count >= tokens.length-1){
                         res.render(__dirname + "/../views/message",{
-                            error: "Invalid attempt at password reset, if you followed a link it may have expired",
+                            error: generalErrorStatement,
                             success: false,
                             title: "Invalid",
                             redirect: req.protocol + "://" + req.headers.host
@@ -54,7 +54,7 @@ recovery.get("/", (req, res) => {
         }
         else{//all tokens are expired
             res.render(__dirname + "/../views/message",{
-                error: "Invalid attempt at password reset, if you followed a link it may have expired",
+                error: generalErrorStatement,
                 success: false,
                 title: "Invalid",
                 redirect: req.protocol + "://" + req.headers.host
@@ -86,8 +86,7 @@ recovery.post("/", [
                 if ( err ){                                
                     return res.status(500).send(serverErrorStatement)
                 }   
-                //since bcript compare is asyncronous keep a count of current index into tokens results
-                //in order to render error page(if need be) after last token is checked with bcrypt.compare 
+                
                 let count = 0
                 let foundToken = false
                 if(tokens.length){
@@ -128,7 +127,7 @@ recovery.post("/", [
                             }
                             if(!foundToken && count >= tokens.length-1){
                                 res.render(__dirname + "/../views/message",{
-                                    error: "Invalid attempt at password reset, if you followed a link it may have expired",
+                                    error: generalErrorStatement,
                                     success: false,
                                     title: "Invalid",
                                     redirect: req.protocol + "://" + req.headers.host
@@ -139,7 +138,7 @@ recovery.post("/", [
                 }
                 else{//all tokens are expired
                     res.render(__dirname + "/../views/message",{
-                        error: "Invalid attempt at password reset, if you followed a link it may have expired",
+                        error: generalErrorStatement,
                         success: false,
                         title: "Invalid",
                         redirect: req.protocol + "://" + req.headers.host
@@ -148,7 +147,7 @@ recovery.post("/", [
             })
         }
     }
-    else{//validation error(only possible is empty field)
+    else{//validation error(only possible if empty field)
         let error = errors[0]+" : "+errors[0].msg
         res.render(__dirname + "/../views/new-password",{
             error: error,
