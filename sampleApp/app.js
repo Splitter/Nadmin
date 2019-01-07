@@ -40,7 +40,7 @@ app.use("/Assets",express.static("public"))
 app.use(nadmin)
 
 //setup mongoose
-//mongoose connection created in main app, so subsequent calls by nandmin be on the same connection as main app
+//mongoose connection created in main app, so subsequent calls by nandmin will be on the same connection as main the app
 mongoose.Promise = global.Promise
 //create uri
 //mongodb://username:password@host:port/database
@@ -57,7 +57,7 @@ mongoose.connection.once('open', () => {
 
 
 
-//Nadmin attaches a isLoggedIn function as well as userInfo object to session 
+//Nadmin attaches a 'isLoggedIn' function as well as 'userInfo' object to session 
 app.get('/', (req, res) => {
     if(req.session.isLoggedIn()){
         res.send('Hello '+req.session.userInfo.displayName)  
@@ -67,4 +67,11 @@ app.get('/', (req, res) => {
     }
 })
 app.listen(config.app.port, () => console.log(`App listening on port ${config.app.port}!`))
+
+//At this point you can login, logout, sign up and reset the password
+//ROUTES:
+//login or signin for logging in
+//logout or signout for logging out
+//register or signup for registration
+//forgotpassword for password reset
 
