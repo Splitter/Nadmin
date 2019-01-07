@@ -11,4 +11,4 @@ User management/authentication
 - uses bcrypt encryption on password/token storage
 - crypto module to randomly generate token for reset(with expiration and hashed storage of token)
 - express-brute module to rate limit login attempts
-- TODO: use Handle module to secure headers
+- users Helmet module to secure headers
