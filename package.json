@@ -18,6 +18,7 @@
     "express-brute-mongoose": "^1.0.2",
     "express-session": "^1.15.6",
     "express-validator": "^5.3.1",
+    "helmet": "^3.15.0",
     "nodemailer": "^5.0.0"
   }
 }

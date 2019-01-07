@@ -7,7 +7,8 @@ const   mongoose        = require('mongoose'),
         appRoot         = require('app-root-path'),
         expressBrute    = require('express-brute'),
         mongBruteStore  = require('express-brute-mongoose'),
-        mongBruteSchema = require('express-brute-mongoose/dist/schema')
+        mongBruteSchema = require('express-brute-mongoose/dist/schema'),
+        helmet          = require('helmet')
         
 const   page            = require("./controllers/page"),
         register        = require("./controllers/register"),
@@ -36,7 +37,7 @@ const nadmin = (app, options = {} ) =>{
         userModel       : "user",
         sessionSecret   : "$2b$12$wuJPlBlIRh2SXt18AwbBDOjuh5xPNniStXzTcrytS/Y1aF/zlVyuK",
         sessionExpire   : 4, //days
-        emailOptions   : {
+        emailOptions    : {
             from: 'yourname@gmail.com',
             host: 'smtp.gmail.com',
             port: 465,
@@ -45,7 +46,8 @@ const nadmin = (app, options = {} ) =>{
                 user: "username",
                 pass: "password"
             }
-        }
+        },
+        enableHelmet    : true
     }
     settings = utilities.extend(settings, options)
 
@@ -53,6 +55,26 @@ const nadmin = (app, options = {} ) =>{
     app.use(bodyParser.urlencoded({extended: true}))
     app.use(bodyParser.json())
     app.use(expressValidator())
+    
+    //allow disabling of general helmet middleware, incase custom settings are used in main site
+    //This keeps the CSP protection intact seperately for Nadmin routes
+    if(settings.enableHelmet){
+        app.use(helmet())
+    }
+
+    //middleware function for helmet contentSecurity policy -seperated from helmets main middleware
+    //used for nadmin specific routes
+    const helmetCSP = (req, res, next)=>{        
+        helmet.contentSecurityPolicy({
+            directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'", 'stackpath.bootstrapcdn.com', 'code.jquery.com'],
+                styleSrc:  ["'self'", 'stackpath.bootstrapcdn.com', 'use.fontawesome.com'],
+                fontSrc:   ["'self'", 'stackpath.bootstrapcdn.com', 'use.fontawesome.com']
+            }
+        })(req,res,next)
+    }
+
     //setup session
     app.use(session({
         store: new mongoStore( { 
@@ -70,7 +92,6 @@ const nadmin = (app, options = {} ) =>{
         name: "id"
     }))
 
-
     //middleware function
     return ( req, res, next )=>{
         //attach extra data to res so controllers can access
@@ -85,7 +106,7 @@ const nadmin = (app, options = {} ) =>{
         req.app.use("/nadmin_public",express.static(__dirname + "/nadmin_public"))
         
         //route registration routes
-        req.app.use(["/register", "/signup"] , (req, res)=>{
+        req.app.use(["/register", "/signup"] ,helmetCSP , (req, res)=>{
             //if logged in then do not allow registration
             if(req.session.isLoggedIn()){
                 error = "You are already logged in!"
@@ -103,7 +124,7 @@ const nadmin = (app, options = {} ) =>{
         })        
 
         //route session routes
-        req.app.use(["/login" , "/signin"] , loginRateLimiter.prevent, (req,res)=>{
+        req.app.use(["/login" , "/signin"] , loginRateLimiter.prevent, helmetCSP , (req,res)=>{
             //if logged in then do not allow logging in again
             if(req.session.isLoggedIn()){
                 error = "You are already logged in!"
@@ -119,8 +140,7 @@ const nadmin = (app, options = {} ) =>{
                 sessionManager(req, res)
             }          
         })
-
-        req.app.use(["/logout", "/signout"] , (req,res)=>{
+        req.app.use(["/logout", "/signout"]  ,helmetCSP , (req,res)=>{
             //if logged in then allow logging out
             if(req.session.isLoggedIn()){
                 sessionManager.destroy(req,res)
@@ -136,9 +156,10 @@ const nadmin = (app, options = {} ) =>{
                 })                
             }          
         })
+
         //account recovery
-        req.app.use("/forgotpassword", reset)
-        req.app.use('/recovery', recovery)
+        req.app.use("/forgotpassword" ,helmetCSP , reset)
+        req.app.use('/recovery',helmetCSP , recovery)
 
         //call next middleware
         next();        
