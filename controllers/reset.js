@@ -9,11 +9,12 @@ const   resetToken    = require("../models/resetToken")
 const   reset= express.Router()
 
 //Internal Error statement
-const   serverErrorStatement = "There was an error in your request. Please try again later."
+const   serverErrorStatement = "There was an error in your request. Please try again later.",
+        pageTitle            = "Account Recovery"
 
 //Get: show reset form
 reset.get('/', (req, res)=>{
-    res.render(__dirname + "/../views/reset",{title:"Account recovery"})
+    res.render(__dirname + "/../views/reset",{title: pageTitle})
 })
 
 //Post: generate token and send reset link to users email
@@ -23,7 +24,7 @@ reset.post('/',[
 ], (req, res)=>{
     const errors = req.validationErrors()       
     if(errors){//validation errors
-        res.render(__dirname + "/../views/reset",{title:"Account recovery",error:errors[0].param +" : "+errors[0].msg})
+        res.render(__dirname + "/../views/reset",{title: pageTitle,error:errors[0].param +" : "+errors[0].msg})
     }  
     else{//check if user exists for given email 
         const user = require( req.modelDirectory+"/"+req.userModel )    
@@ -33,7 +34,7 @@ reset.post('/',[
             }     
 
             if (!userInfo){//user with email does not exist
-                res.render(__dirname + "/../views/reset",{title:"Account recovery",error:"User with that email does not exist"})
+                res.render(__dirname + "/../views/reset",{title: pageTitle,error:"User with that email does not exist"})
             } 
             else{//user exists with that email
                 crypto.randomBytes(20, (err, buf) => {//generate random token
@@ -74,14 +75,14 @@ reset.post('/',[
                                     res.render(__dirname + "/../views/reset", {
                                         error: "Internal Error sending email, please try again later",
                                         success: false,
-                                        title:"Account recovery"
+                                        title: pageTitle
                                     })         
                                 }
                                 else{         
                                     res.render(__dirname + "/../views/reset", {
                                         error: false,
                                         success: "An email with recovery instructions has been sent to the supplied email",
-                                        title:"Account recovery",
+                                        title: pageTitle,
                                         redirect: req.protocol + "://" + req.headers.host
                                     })         
                                 }

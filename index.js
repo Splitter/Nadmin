@@ -51,18 +51,22 @@ const nadmin = (app, options = {} ) =>{
     }
     settings = utilities.extend(settings, options)
 
-    //attach middleware
+    //make static nadmin assets accessable
+    app.use("/nadmin_public",express.static(__dirname + "/nadmin_public"))
+
+    //attach 3rd party middleware      
     app.use(bodyParser.urlencoded({extended: true}))
     app.use(bodyParser.json())
     app.use(expressValidator())
-    
+
     //allow disabling of general helmet middleware, incase custom settings are used in main site
     //This keeps the CSP protection intact seperately for Nadmin routes
     if(settings.enableHelmet){
         app.use(helmet())
     }
+    //CSRF middleware error function
 
-    //middleware function for helmet contentSecurity policy -seperated from helmets main middleware
+    //middleware function for helmet content security policy -seperated from helmets main middleware
     //used for nadmin specific routes
     const helmetCSP = (req, res, next)=>{        
         helmet.contentSecurityPolicy({
@@ -91,79 +95,33 @@ const nadmin = (app, options = {} ) =>{
         },
         name: "id"
     }))
-
-    //middleware function
-    return ( req, res, next )=>{
+    
+    //Nadmin middleware
+    app.use(( req, res, next )=>{
         //attach extra data to res so controllers can access
         req.modelDirectory = settings.appRoot+"/"+settings.modelDirectory
         req.userModel = settings.userModel
         req.emailOptions = settings.emailOptions
-
         //utility function to tell whether user is logged in
-        req.session.isLoggedIn = () =>{ return req.session.userInfo ? true : false}
-        
-        //make static nadmin assets accessable
-        req.app.use("/nadmin_public",express.static(__dirname + "/nadmin_public"))
-        
-        //route registration routes
-        req.app.use(["/register", "/signup"] ,helmetCSP , (req, res)=>{
-            //if logged in then do not allow registration
-            if(req.session.isLoggedIn()){
-                error = "You are already logged in!"
-                let redirect = req.protocol + "://" + req.headers.host
-                res.render(__dirname + "/views/message",{
-                    errors: error,
-                    success: false,
-                    title:error,
-                    redirect: redirect
-                })
-            }
-            else{ //new user so allow registration
-                register(req, res)
-            }
-        })        
-
-        //route session routes
-        req.app.use(["/login" , "/signin"] , loginRateLimiter.prevent, helmetCSP , (req,res)=>{
-            //if logged in then do not allow logging in again
-            if(req.session.isLoggedIn()){
-                error = "You are already logged in!"
-                let redirect = req.protocol + "://" + req.headers.host
-                res.render(__dirname + "/views/message",{
-                    errors: error,
-                    success: false,
-                    title:error,
-                    redirect: redirect
-                })
-            }
-            else{ //new user so allow logging in
-                sessionManager(req, res)
-            }          
-        })
-        req.app.use(["/logout", "/signout"]  ,helmetCSP , (req,res)=>{
-            //if logged in then allow logging out
-            if(req.session.isLoggedIn()){
-                sessionManager.destroy(req,res)
-            }
-            else{ //Not logged in so no need to log out
-                error = "You are not logged in!"
-                let redirect = req.protocol + "://" + req.headers.host
-                res.render(__dirname + "/views/message",{
-                    errors: error,
-                    success: false,
-                    title:error,
-                    redirect: redirect
-                })                
-            }          
-        })
-
-        //account recovery
-        req.app.use("/forgotpassword" ,helmetCSP , reset)
-        req.app.use('/recovery',helmetCSP , recovery)
-
+        req.session.isLoggedIn = () =>{ return req.session.userInfo ? true : false}        
         //call next middleware
         next();        
-    }
+    })
+
+    /********************/
+    /* USER AUTH ROUTES */
+    /********************/
+    //registration route
+    app.use(["/register", "/signup"] ,helmetCSP , register)     
+    //session routes
+    app.use(["/login" , "/signin"] , loginRateLimiter.prevent, helmetCSP , sessionManager)
+    app.use(["/logout", "/signout"]  ,helmetCSP , sessionManager.destroy)
+    //account recovery routes
+    app.use("/forgotpassword" ,helmetCSP , reset)
+    app.use('/recovery',helmetCSP , recovery)
+
+    // - USER AUTH ROUTES
+
 }
 
 nadmin.Page = page

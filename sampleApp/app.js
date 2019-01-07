@@ -35,10 +35,6 @@ app.set('view engine','pug')
 //set directory for static assets
 app.use("/Assets",express.static("public"))
 
-//Initialize and setup nadmin middleware before others
-//Needs done early so it can control register/login/reset routes and etc
-app.use(nadmin)
-
 //setup mongoose
 //mongoose connection created in main app, so subsequent calls by nandmin will be on the same connection as main the app
 mongoose.Promise = global.Promise

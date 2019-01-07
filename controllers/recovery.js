@@ -1,15 +1,15 @@
 const   express       = require('express'),
         { body }      = require('express-validator/check'),
-        bcrypt        = require('bcrypt'),
-        crypto        = require('crypto'),
-        nodemailer    = require('nodemailer')
+        bcrypt        = require('bcrypt')
 
 const   resetToken    = require("../models/resetToken")
 const   recovery= express.Router()
 
 //Internal Error statement
 const   serverErrorStatement = "There was an error in your request. Please try again later.",
-        generalErrorStatement= "Invalid attempt at password reset, if you followed a link it may have expired"
+        errorStatement       = "Invalid attempt at password reset, if you followed a link it may have expired",
+        successStatement     = "Password has been successfully changed",
+        pageTitle            = "Account Recovery"
 
 recovery.get("/", (req, res) => {
     if(!req.query.reset){                     
@@ -37,15 +37,15 @@ recovery.get("/", (req, res) => {
                         res.render(__dirname + "/../views/new-password",{
                             error: false,
                             success: false,
-                            title: "Account Recovery",
+                            title: pageTitle,
                             token: req.query.reset
                         }) 
                     }
                     if(!foundToken && count >= tokens.length-1){
                         res.render(__dirname + "/../views/message",{
-                            error: generalErrorStatement,
+                            error: errorStatement,
                             success: false,
-                            title: "Invalid",
+                            title: pageTitle,
                             redirect: req.protocol + "://" + req.headers.host
                         })        
                     }   
@@ -54,9 +54,9 @@ recovery.get("/", (req, res) => {
         }
         else{//all tokens are expired
             res.render(__dirname + "/../views/message",{
-                error: generalErrorStatement,
+                error: errorStatement,
                 success: false,
-                title: "Invalid",
+                title: pageTitle,
                 redirect: req.protocol + "://" + req.headers.host
             })        
         }   
@@ -73,9 +73,9 @@ recovery.post("/", [
     if(!errors){//no validation errors
         if(req.body.password != req.body.confirmPassword){ //passwords do not match            
             res.render(__dirname + "/../views/new-password",{
-                error: "The password fields do not match",
+                error: errorStatement,
                 success: false,
-                title: "Account Recovery",
+                title: pageTitle,
                 token: req.body.token
             }) 
         }
@@ -117,8 +117,8 @@ recovery.post("/", [
                                             }   
                                             res.render(__dirname + "/../views/message",{
                                                 error: false,
-                                                success: "Password has been successfully changed",
-                                                title: "Success",
+                                                success:  successStatement ,
+                                                title: pageTitle,
                                                 redirect: req.protocol + "://" + req.headers.host
                                             })       
                                         });
@@ -127,9 +127,9 @@ recovery.post("/", [
                             }
                             if(!foundToken && count >= tokens.length-1){
                                 res.render(__dirname + "/../views/message",{
-                                    error: generalErrorStatement,
+                                    error: errorStatement,
                                     success: false,
-                                    title: "Invalid",
+                                    title: pageTitle,
                                     redirect: req.protocol + "://" + req.headers.host
                                 })        
                             }   
@@ -138,9 +138,9 @@ recovery.post("/", [
                 }
                 else{//all tokens are expired
                     res.render(__dirname + "/../views/message",{
-                        error: generalErrorStatement,
+                        error: errorStatement,
                         success: false,
-                        title: "Invalid",
+                        title: pageTitle,
                         redirect: req.protocol + "://" + req.headers.host
                     })        
                 }   
@@ -152,7 +152,7 @@ recovery.post("/", [
         res.render(__dirname + "/../views/new-password",{
             error: error,
             success: false,
-            title: "Account Recovery",
+            title: pageTitle,
             token: req.body.token
         }) 
     }
