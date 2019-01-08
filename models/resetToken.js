@@ -1,5 +1,5 @@
 
-const    Page = require("../controllers/page")
+const    Page = require("../lib/page")
 
 const resetToken = new Page('resettokens');
 

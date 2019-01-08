@@ -1,3 +1,4 @@
+
 const   mongoose        = require('mongoose'),
         express         = require('express'),
         cookieParser    = require('cookie-parser'),
@@ -12,12 +13,13 @@ const   mongoose        = require('mongoose'),
         helmet          = require('helmet'),
         csrf            = require('csurf')
         
-const   page            = require("./controllers/page"),
+const   page            = require("./lib/page"),
         register        = require("./controllers/register"),
         reset           = require("./controllers/reset"),
         recovery        = require("./controllers/recovery"),
         sessionManager  = require("./controllers/sessionManager"),
-        utilities       = require("./utilities"),
+        utilities       = require("./lib/utilities"),
+        admin           = require("./admin"),
         helmetCSP       = utilities.helmetCSP
 
 //Make mongoose use newer native driver api's and get rid of depreciation warnings
@@ -47,7 +49,8 @@ const nadmin = (app, options = {} ) =>{
                 pass: "password"
             }
         },
-        enableHelmet    : true
+        enableHelmet    : true,
+        adminRoute      : "/admin"
     }
     settings = utilities.extend(settings, options)
     //make static nadmin assets accessable
@@ -134,6 +137,13 @@ const nadmin = (app, options = {} ) =>{
     app.use("/forgotpassword" ,helmetCSP , reset)
     app.use('/recovery',helmetCSP , recovery)
     // - USER AUTH ROUTES
+
+    /********************/
+    /*   ADMIN ROUTE    */
+    /********************/
+    admin.setOptions( settings )
+    app.use( settings.adminRoute , admin )
+    
 
 }
 
