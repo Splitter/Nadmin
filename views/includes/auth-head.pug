@@ -8,4 +8,4 @@ link(rel='stylesheet', href='nadmin_public/css/auth-forms.css')
 link(href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet")
 
 if(redirect)
-    script setTimeout(function () { window.location = '#{ redirect }'; }, 3000);
+    meta(http-equiv="refresh" content="3; "+redirect)

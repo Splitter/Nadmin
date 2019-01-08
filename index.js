@@ -75,7 +75,7 @@ const nadmin = (app, options = {} ) =>{
         helmet.contentSecurityPolicy({
             directives: {
                 defaultSrc: ["'self'"],
-                scriptSrc: ["'self'", "'unsafe-inline'", 'stackpath.bootstrapcdn.com', 'code.jquery.com'],
+                scriptSrc: ["'self'", 'stackpath.bootstrapcdn.com', 'code.jquery.com'],
                 styleSrc:  ["'self'", 'stackpath.bootstrapcdn.com', 'use.fontawesome.com'],
                 fontSrc:   ["'self'", 'stackpath.bootstrapcdn.com', 'use.fontawesome.com']
             }
