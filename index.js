@@ -17,22 +17,20 @@ const   page            = require("./controllers/page"),
         reset           = require("./controllers/reset"),
         recovery        = require("./controllers/recovery"),
         sessionManager  = require("./controllers/sessionManager"),
-        utilities       = require("./utilities")
+        utilities       = require("./utilities"),
+        helmetCSP       = utilities.helmetCSP
 
 //Make mongoose use newer native driver api's and get rid of depreciation warnings
 mongoose.set('useFindAndModify', false)
 mongoose.set('useCreateIndex', true);
 
-//setup rate limiter for login page
-const loginLimitStore = new mongBruteStore(mongoose.model( 'loginRateLimiter', mongBruteSchema ))        
-const loginRateLimiter = new expressBrute(loginLimitStore, {
-    freeRetries: 5,
-    minWait: 5*60*1000, // 5 minutes
-    maxWait: 60*60*1000 // 1 hour
-});
 
 //Main Nadmin middleware
 const nadmin = (app, options = {} ) =>{
+    
+    /********************/
+    /*     SETTINGS     */
+    /********************/
     settings = {
         appRoot         : appRoot,
         modelDirectory  : "models",
@@ -52,36 +50,28 @@ const nadmin = (app, options = {} ) =>{
         enableHelmet    : true
     }
     settings = utilities.extend(settings, options)
-
     //make static nadmin assets accessable
     app.use("/nadmin_public",express.static(__dirname + "/nadmin_public"))
 
-    //attach 3rd party middleware      
+    /************************/
+    /* 3RD PARTY MIDDLEWARE */ 
+    /************************/
     app.use(cookieParser())
     app.use(bodyParser.urlencoded({extended: true}))
     app.use(bodyParser.json())
-    app.use(expressValidator())
-   
+    app.use(expressValidator())   
+    //setup rate limiter for login page
+    const loginLimitStore = new mongBruteStore(mongoose.model( 'loginRateLimiter', mongBruteSchema ))        
+    const loginRateLimiter = new expressBrute(loginLimitStore, {
+        freeRetries: 5,
+        minWait: 5*60*1000, // 5 minutes
+        maxWait: 60*60*1000 // 1 hour
+    });
     //allow disabling of general helmet middleware, incase custom settings are used in main site
     //This keeps the CSP protection intact seperately for Nadmin routes
     if(settings.enableHelmet){
         app.use(helmet())
     }
-    
-
-    //middleware function for helmet content security policy -seperated from helmets main middleware
-    //used for nadmin specific routes
-    const helmetCSP = (req, res, next)=>{        
-        helmet.contentSecurityPolicy({
-            directives: {
-                defaultSrc: ["'self'"],
-                scriptSrc: ["'self'", 'stackpath.bootstrapcdn.com', 'code.jquery.com'],
-                styleSrc:  ["'self'", 'stackpath.bootstrapcdn.com', 'use.fontawesome.com'],
-                fontSrc:   ["'self'", 'stackpath.bootstrapcdn.com', 'use.fontawesome.com']
-            }
-        })(req,res,next)
-    }
-
     //setup session
     app.use(session({
         store: new mongoStore( { 
@@ -98,11 +88,12 @@ const nadmin = (app, options = {} ) =>{
         },
         name: "id"
     }))
-
     //enable csrf protection
     app.use(csrf())    
     
-    //Nadmin middleware
+    /************************/
+    /*   NADMIN MIDDLEWARE  */ 
+    /************************/
     app.use(( req, res, next )=>{
         //attach extra data to res so controllers can access
         req.modelDirectory = settings.appRoot+"/"+settings.modelDirectory
@@ -114,10 +105,10 @@ const nadmin = (app, options = {} ) =>{
         //call next middleware
         next();        
     })
-    //Error middelware
+    //error middelware
     app.use( ( err, req, res, next )=>{
         if(err.code == 'EBADCSRFTOKEN'){
-            res.render(__dirname + "/../views/message",{
+            res.render(__dirname + "/views/message",{
                 error: "Session has expired or form has been tampered with.",
                 success: false,
                 title: "Error",
@@ -127,7 +118,9 @@ const nadmin = (app, options = {} ) =>{
         else{
             next(err)
         }
-    })
+    })    
+
+    //begin routing
 
     /********************/
     /* USER AUTH ROUTES */
@@ -140,11 +133,11 @@ const nadmin = (app, options = {} ) =>{
     //account recovery routes
     app.use("/forgotpassword" ,helmetCSP , reset)
     app.use('/recovery',helmetCSP , recovery)
-
     // - USER AUTH ROUTES
 
 }
 
+//expose models
 nadmin.Page = page
 
 module.exports = nadmin;
