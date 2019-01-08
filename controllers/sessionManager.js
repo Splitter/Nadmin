@@ -116,6 +116,7 @@ sessionManager.post('/',[
                                     }
                                     //render success message then redirect to app root
                                     let success = "You have successfully signed in!"
+                                    req.brute.reset()//reset rate limiter
                                     res.render(__dirname + "/../views/login",{
                                         errors: false,
                                         success: success,
