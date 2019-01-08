@@ -17,12 +17,12 @@ sessionManager.destroy.get('/',(req, res) =>{
     //destroy session
     //if logged in then allow logging out
     if(req.session.isLoggedIn()){
+        let success = "You have been successfully signed out"
         req.session.destroy((err) => {
             if ( err ){                                
                return res.status(500).send(serverErrorStatement)
             }
-            let success = "You have been successfully signed out"
-            res.render(__dirname + "/views/message",{
+            res.render(__dirname + "/../views/message",{
                 errors: false,
                 success: success ,
                 title: success,
@@ -33,7 +33,7 @@ sessionManager.destroy.get('/',(req, res) =>{
     else{ //Not logged in so no need to log out
         error = "You are not logged in!"
         let redirect = req.protocol + "://" + req.headers.host
-        res.render(__dirname + "/views/message",{
+        res.render(__dirname + "/../views/message",{
             errors: error,
             success: false,
             title: pageTitle,
@@ -48,7 +48,7 @@ sessionManager.get('/', (req, res)=>{
     if(req.session.isLoggedIn()){
         error = "You are already logged in!"
         let redirect = req.protocol + "://" + req.headers.host
-        res.render(__dirname + "/views/message",{
+        res.render(__dirname + "/../views/message",{
             errors: error,
             success: false,
             title: pageTitle,
@@ -70,7 +70,7 @@ sessionManager.post('/',[
     if(req.session.isLoggedIn()){
         error = "You are already logged in!"
         let redirect = req.protocol + "://" + req.headers.host
-        res.render(__dirname + "/views/message",{
+        res.render(__dirname + "/../views/message",{
             errors: error,
             success: false,
             title: pageTitle,

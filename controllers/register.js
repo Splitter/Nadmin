@@ -14,7 +14,7 @@ register.get('/', (req, res)=>{
     if(req.session.isLoggedIn()){
         error = loggedInStatement
         let redirect = req.protocol + "://" + req.headers.host
-        res.render(__dirname + "/views/message",{
+        res.render(__dirname + "/../views/message",{
             errors: error,
             success: false,
             title: pageTitle,
@@ -39,7 +39,7 @@ register.post('/',[
     if(req.session.isLoggedIn()){
         error = loggedInStatement
         let redirect = req.protocol + "://" + req.headers.host
-        res.render(__dirname + "/views/message",{
+        res.render(__dirname + "/../views/message",{
             errors: error,
             success: false,
             title: pageTitle,

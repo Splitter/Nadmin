@@ -1,5 +1,6 @@
 const   mongoose        = require('mongoose'),
         express         = require('express'),
+        cookieParser    = require('cookie-parser'),
         bodyParser      = require('body-parser'),
         expressValidator= require('express-validator'),
         session         = require('express-session'),
@@ -8,7 +9,8 @@ const   mongoose        = require('mongoose'),
         expressBrute    = require('express-brute'),
         mongBruteStore  = require('express-brute-mongoose'),
         mongBruteSchema = require('express-brute-mongoose/dist/schema'),
-        helmet          = require('helmet')
+        helmet          = require('helmet'),
+        csrf            = require('csurf')
         
 const   page            = require("./controllers/page"),
         register        = require("./controllers/register"),
@@ -55,16 +57,17 @@ const nadmin = (app, options = {} ) =>{
     app.use("/nadmin_public",express.static(__dirname + "/nadmin_public"))
 
     //attach 3rd party middleware      
+    app.use(cookieParser())
     app.use(bodyParser.urlencoded({extended: true}))
     app.use(bodyParser.json())
     app.use(expressValidator())
-
+   
     //allow disabling of general helmet middleware, incase custom settings are used in main site
     //This keeps the CSP protection intact seperately for Nadmin routes
     if(settings.enableHelmet){
         app.use(helmet())
     }
-    //CSRF middleware error function
+    
 
     //middleware function for helmet content security policy -seperated from helmets main middleware
     //used for nadmin specific routes
@@ -72,7 +75,7 @@ const nadmin = (app, options = {} ) =>{
         helmet.contentSecurityPolicy({
             directives: {
                 defaultSrc: ["'self'"],
-                scriptSrc: ["'self'", 'stackpath.bootstrapcdn.com', 'code.jquery.com'],
+                scriptSrc: ["'self'", "'unsafe-inline'", 'stackpath.bootstrapcdn.com', 'code.jquery.com'],
                 styleSrc:  ["'self'", 'stackpath.bootstrapcdn.com', 'use.fontawesome.com'],
                 fontSrc:   ["'self'", 'stackpath.bootstrapcdn.com', 'use.fontawesome.com']
             }
@@ -95,6 +98,9 @@ const nadmin = (app, options = {} ) =>{
         },
         name: "id"
     }))
+
+    //enable csrf protection
+    app.use(csrf())    
     
     //Nadmin middleware
     app.use(( req, res, next )=>{
@@ -102,10 +108,25 @@ const nadmin = (app, options = {} ) =>{
         req.modelDirectory = settings.appRoot+"/"+settings.modelDirectory
         req.userModel = settings.userModel
         req.emailOptions = settings.emailOptions
+        res.locals.csrfTokenGet = req.csrfToken
         //utility function to tell whether user is logged in
         req.session.isLoggedIn = () =>{ return req.session.userInfo ? true : false}        
         //call next middleware
         next();        
+    })
+    //Error middelware
+    app.use( ( err, req, res, next )=>{
+        if(err.code == 'EBADCSRFTOKEN'){
+            res.render(__dirname + "/../views/message",{
+                error: "Session has expired or form has been tampered with.",
+                success: false,
+                title: "Error",
+                redirect: req.protocol + "://" + req.headers.host
+            })        
+        }
+        else{
+            next(err)
+        }
     })
 
     /********************/

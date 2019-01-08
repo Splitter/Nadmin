@@ -12,3 +12,4 @@ User management/authentication
 - crypto module to randomly generate token for reset(with expiration and hashed storage of token)
 - express-brute module to rate limit login attempts
 - uses Helmet module to secure headers
+- csurf for crsf protection

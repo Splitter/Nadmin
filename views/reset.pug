@@ -16,7 +16,7 @@ html( lang="en" )
                     div.success-box= success
 
                 form.nadmin-form(action="/forgotpassword", method="post")
-                    span#reauth-email.reauth-email
+                    input(type="hidden", name="_csrf", value= csrfTokenGet())
                     input#inputEmail.form-control(type='email', name='email' placeholder='Email address', required='', autofocus='')
                     button.btn.btn-lg.btn-primary.btn-block.btn-signin(type='submit') Reset Now
                 // /form
