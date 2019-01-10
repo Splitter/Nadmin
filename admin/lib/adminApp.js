@@ -1,5 +1,7 @@
 
-const   express  = require("express")
+const   express   = require("express"),
+        helmet    = require("helmet")
+        helmetCSP = require("../../lib/utilities").helmetCSP
 //adminApp is just an express object extended and manipulated
 adminApp = express()
 
@@ -10,13 +12,22 @@ adminApp.render = (name, options, callback)=>{
     adminApp.nRender(__dirname + "/../views/"+name,options,callback)
 }
 
+//Content Security policy middleware
+adminApp.use(helmetCSP)
 
 /**
  * Utility function to get nadmin options from nadmin root into adminApp
  *
  * @param {Object} options
  */
-adminApp.setOptions = ( options ) => { adminApp.nadminSettings = options }
+adminApp.setOptions = ( options ) => {
+    adminApp.nadminSettings = options 
+    //allow disabling of general helmet middleware, incase custom settings are used in main site
+    //This keeps the CSP protection intact seperately for Nadmin routes
+    if(adminApp.nadminSettings.enableHelmet){
+        adminApp.use(helmet())
+    }
+}
 
 
 module.exports= adminApp
