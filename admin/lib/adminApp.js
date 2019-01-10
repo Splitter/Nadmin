@@ -1,6 +1,8 @@
 
 const   express   = require("express"),
-        helmet    = require("helmet")
+        helmet    = require("helmet"),
+        glob = require( 'glob' ),
+        path = require( 'path' ),
         helmetCSP = require("../../lib/utilities").helmetCSP
 //adminApp is just an express object extended and manipulated
 adminApp = express()
@@ -27,7 +29,33 @@ adminApp.setOptions = ( options ) => {
     if(adminApp.nadminSettings.enableHelmet){
         adminApp.use(helmet())
     }
+    if(!Array.isArray(adminApp.pageArray) || !adminApp.pageArray.length){
+        adminApp.getPages()
+    }
 }
 
+/**
+ * Gets all users page models into array
+ * 
+ */
+adminApp.getPages = () => {
+    const page = require("./../../lib/page")
+    const modelPath = adminApp.nadminSettings.appRoot + "/"+ adminApp.nadminSettings.modelDirectory;
+    adminApp.pageArray = []
+    glob.sync(modelPath+'/*.js').forEach( function( file ) {
+        try {
+            let nPage =  require( path.resolve( file ) )
+            if (nPage instanceof page){
+                adminApp.pageArray.push({
+                    name : path.basename(file, '.js'),
+                    class: nPage
+                })
+            }
+        }
+        catch (e) {
+            console.log(e)
+        }
+    });
+}
 
 module.exports= adminApp
