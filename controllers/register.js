@@ -63,7 +63,7 @@ register.post('/',[
             if(!password){ errorList.push( "Password and Confirmation password do not match" ) }
 
             //get User model
-            const user = require( req.modelDirectory+"/"+req.userModel )            
+            const user = require( req.nadminSettings.appRoot+"/"+req.nadminSettings.modelDirectory+"/"+req.nadminSettings.userModel )     
             if(errorList.length == 0){//Fields match so see if user data already exists
                 user.model.find({ displayName : req.body.displayname }, (err, docs) => {
                     if (docs.length){ 

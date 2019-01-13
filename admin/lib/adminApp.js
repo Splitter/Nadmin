@@ -1,4 +1,3 @@
-
 const   express   = require("express"),
         helmet    = require("helmet"),
         glob = require( 'glob' ),
@@ -15,32 +14,34 @@ adminApp.render = (name, options, callback)=>{
 }
 
 //Content Security policy middleware
-adminApp.use(helmetCSP)
+adminApp.use(helmetCSP) 
+
+//make static nadmin admin assets accessable
+adminApp.use("/public",express.static(__dirname + "/../public"))
 
 /**
- * Utility function to get nadmin options from nadmin root into adminApp
+ * Utility function to initialize a few things
  *
  * @param {Object} options
  */
-adminApp.setOptions = ( options ) => {
-    adminApp.nadminSettings = options 
+adminApp.init = ( options ) => {
     //allow disabling of general helmet middleware, incase custom settings are used in main site
     //This keeps the CSP protection intact seperately for Nadmin routes
-    if(adminApp.nadminSettings.enableHelmet){
+    if(options.enableHelmet){
         adminApp.use(helmet())
     }
     if(!Array.isArray(adminApp.pageArray) || !adminApp.pageArray.length){
-        adminApp.getPages()
+        adminApp.getPages(options)
     }
 }
 
 /**
- * Gets all users page models into array
+ * Gets all page models into array
  * 
  */
-adminApp.getPages = () => {
+adminApp.getPages = ( options ) => {
     const page = require("./../../lib/page")
-    const modelPath = adminApp.nadminSettings.appRoot + "/"+ adminApp.nadminSettings.modelDirectory;
+    const modelPath = options.appRoot + "/"+ options.modelDirectory;
     adminApp.pageArray = []
     glob.sync(modelPath+'/*.js').forEach( function( file ) {
         try {

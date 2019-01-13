@@ -27,7 +27,7 @@ reset.post('/',[
         res.render(__dirname + "/../views/reset",{title: pageTitle,error:errors[0].param +" : "+errors[0].msg})
     }  
     else{//check if user exists for given email 
-        const user = require( req.modelDirectory+"/"+req.userModel )    
+        const user = require( req.nadminSettings.appRoot+"/"+req.nadminSettings.modelDirectory+"/"+req.nadminSettings.userModel ) 
         user.model.findOne( { email : req.body.email }, (err, userInfo) => { 
             if ( err ){                                
                return res.status(500).send(serverErrorStatement)

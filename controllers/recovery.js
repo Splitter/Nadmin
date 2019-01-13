@@ -100,7 +100,7 @@ recovery.post("/", [
                             count = count + 1
                             if ( result ) {//tokens match update password
                                 foundToken = true
-                                const user = require( req.modelDirectory+"/"+req.userModel ) 
+                                const user = require( req.nadminSettings.appRoot+"/"+req.nadminSettings.modelDirectory+"/"+req.nadminSettings.userModel ) 
                                 bcrypt.hash(req.body.password, 12, (err, hash) => {   
                                     if ( err ){                                
                                         return res.status(500).send(serverErrorStatement)

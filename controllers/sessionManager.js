@@ -11,6 +11,41 @@ const   errorStatement       = "Credentials are incorrect, please check fields a
         serverErrorStatement = "There was an error in your request. Please try again later.",
         pageTitle            = "Sign in"
 
+/**
+ * Middleware function adds session data to res variable
+ *
+ * @param {Object} request
+ * @param {Object} response
+ */
+sessionManager.init = (req, res, next)=>{    
+    res.locals.csrfTokenGet = req.csrfToken
+    //utility function to tell whether user is logged in
+    req.session.isLoggedIn = () =>{ return req.session.userInfo ? true : false}    
+    next()
+}
+
+/**
+ * Middleware Error function checks for bad CSRF token
+ *
+ * @param {Object} error
+ * @param {Object} request
+ * @param {Object} response
+ * 
+ * @return {Boolean} based on whether error was CSRF token error
+ */
+sessionManager.csrfErrorCheck = ( err, req, res, next )=>{
+    if(err.code == 'EBADCSRFTOKEN'){
+        res.render(__dirname + "/views/message",{
+            error: "Session has expired or form has been tampered with.",
+            success: false,
+            title: "Error",
+            redirect: req.protocol + "://" + req.headers.host
+        }) 
+    }
+    else{
+        next()
+    }
+}
 
 //Get(logout or signout): user wants to sign out
 sessionManager.destroy.get('/',(req, res) =>{
@@ -82,7 +117,7 @@ sessionManager.post('/',[
         const errors = req.validationErrors()
         if(!errors){//no validation errors
             //get User model
-            const user = require( req.modelDirectory+"/"+req.userModel )    
+            const user = require( req.nadminSettings.appRoot+"/"+req.nadminSettings.modelDirectory+"/"+req.nadminSettings.userModel ) 
             user.model.findOne( { email : req.body.email }, (err, userInfo) => {
                 
                 if ( err ){                                
