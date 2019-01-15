@@ -19,13 +19,16 @@ dashboard.get("/",(req,res)=>{
                                         res.locals.nadminDashModels.push({
                                                 name:page.name,
                                                 count:docs.length,
+                                                canCreate: page.object.settings.canCreate,
                                                 dispOrder: page.object.settings.displayOrder
+
                                         })
                                 }
                                 else{
                                         res.locals.nadminDashModels.push({
                                                 name:page.name,
                                                 count:0,
+                                                canCreate: page.object.settings.canCreate,
                                                 dispOrder: page.settings.displayOrder
                                         })
                                 }

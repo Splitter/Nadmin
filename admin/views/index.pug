@@ -14,8 +14,9 @@ html( lang="en" )
                             a.model-block( href= nadminAdminURL + '/' + model.name )
                                 h5= model.name
                                 p (#{ model.count } items)
-                            a.model-create( href= nadminAdminURL + '/' + model.name  + '/create' )
-                                i.fas.fa-plus-circle
+                            if model.canCreate
+                                a.model-create( href= nadminAdminURL + '/' + model.name  + '/create' )
+                                    i.fas.fa-plus-circle
 
 
 
