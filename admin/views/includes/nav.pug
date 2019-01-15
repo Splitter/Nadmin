@@ -1,0 +1,11 @@
+nav.nav-side-menu
+    div.brand 
+        a(href=nadminAdminURL)
+            i.fas.fa-tachometer-alt
+            | #{ nadminAdminTitle }
+    i.fa.fa-bars.navbar-toggler.toggle-btn(data-toggle='collapse' data-target='#menu-content')
+    div.menu-list
+        ul#menu-content.menu-content.collapse.navbar-collapse        
+            each name in nadminAdminLinks
+                li
+                    a( href= nadminAdminURL + '/' + name )= name
