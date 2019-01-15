@@ -3,6 +3,7 @@ Goal is to become an adminstration interface for Node/Express/Mongoose based web
 
 
 ![enter image description here](https://raw.githubusercontent.com/Splitter/nadmin/master/preview.png)
+![enter image description here](https://raw.githubusercontent.com/Splitter/nadmin/master/preview2.png)
 
 
 ### Current state:
@@ -13,3 +14,7 @@ User management/authentication
 - express-brute module to rate limit login attempts
 - helmet module to secure headers
 - csurf module for csrf protection
+
+Admin Dashboard
+- beggining of development
+- main dashboard index is 'functional'
