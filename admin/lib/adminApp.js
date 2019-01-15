@@ -61,9 +61,7 @@ adminApp.setupPages = ( options ) => {
                     object: nPage
                 })
                 //route /name to 'route' method of page object
-                adminApp.use(("/"+nPage.name), (req, res)=>{
-                    nPage.route(req,res)
-                })
+                adminApp.use(("/"+nPage.name), nPage.router)
             }
         }
         catch (e) {
@@ -82,11 +80,9 @@ adminApp.setupPages = ( options ) => {
     adminApp.pageArray.forEach((nPage)=>{    
         adminApp.locals.nadminAdminLinks.push(nPage.name)
     })
-    dashboard.pageArray = adminApp.pageArray
-    
+    dashboard.pageArray = adminApp.pageArray    
 }
 
 adminApp.use("/",dashboard)
-
 
 module.exports= adminApp
