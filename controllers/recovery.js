@@ -5,20 +5,15 @@ const   express       = require('express'),
 const   resetToken    = require("../models/resetToken")
 const   recovery= express.Router()
 
-//Internal Error statement
-const   serverErrorStatement = "There was an error in your request. Please try again later.",
-        errorStatement       = "Invalid attempt at password reset, if you followed a link it may have expired",
-        successStatement     = "Password has been successfully changed",
-        pageTitle            = "Account Recovery"
 
 recovery.get("/", (req, res) => {
     if(!req.query.reset){                     
-        return res.status(403).send(serverErrorStatement)
+        return res.status(403).send(res.__("There was an error in your request. Please try again later."))
     }   
     //get all tokens from DB
     resetToken.model.find( {expires: { $gt: Date.now() } }, (err, tokens) => {
         if ( err ){                                
-            return res.status(500).send(serverErrorStatement)
+            return res.status(500).send(res.__("There was an error in your request. Please try again later."))
         }   
         
         let count = 0
@@ -29,7 +24,7 @@ recovery.get("/", (req, res) => {
                 //see if queried hash matches current token
                 bcrypt.compare( req.query.reset, token.tokenHash,  (err, result)=> {
                     if ( err ){                                
-                        return res.status(500).send(serverErrorStatement)
+                        return res.status(500).send(res.__("There was an error in your request. Please try again later."))
                     }   
                     count = count + 1
                     if ( result ) {//tokens match - render form
@@ -37,15 +32,15 @@ recovery.get("/", (req, res) => {
                         res.render(__dirname + "/../views/new-password",{
                             error: false,
                             success: false,
-                            title: pageTitle,
+                            title: res.__("Account Recovery"),
                             token: req.query.reset
                         }) 
                     }
                     if(!foundToken && count >= tokens.length-1){
                         res.render(__dirname + "/../views/message",{
-                            error: errorStatement,
+                            error: res.__("Invalid attempt at password reset, if you followed a link it may have expired"),
                             success: false,
-                            title: pageTitle,
+                            title: res.__("Account Recovery"),
                             redirect: req.protocol + "://" + req.headers.host
                         })        
                     }   
@@ -54,9 +49,9 @@ recovery.get("/", (req, res) => {
         }
         else{//all tokens are expired
             res.render(__dirname + "/../views/message",{
-                error: errorStatement,
+                error: res.__("Invalid attempt at password reset, if you followed a link it may have expired"),
                 success: false,
-                title: pageTitle,
+                title: res.__("Account Recovery"),
                 redirect: req.protocol + "://" + req.headers.host
             })        
         }   
@@ -73,9 +68,9 @@ recovery.post("/", [
     if(!errors){//no validation errors
         if(req.body.password != req.body.confirmPassword){ //passwords do not match            
             res.render(__dirname + "/../views/new-password",{
-                error: errorStatement,
+                error: res.__("Invalid attempt at password reset, if you followed a link it may have expired"),
                 success: false,
-                title: pageTitle,
+                title: res.__("Account Recovery"),
                 token: req.body.token
             }) 
         }
@@ -84,7 +79,7 @@ recovery.post("/", [
             //only tokens not yet expired
             resetToken.model.find( {expires: { $gt: Date.now() } }, (err, tokens) => {
                 if ( err ){                                
-                    return res.status(500).send(serverErrorStatement)
+                    return res.status(500).send(res.__("There was an error in your request. Please try again later."))
                 }   
                 
                 let count = 0
@@ -95,7 +90,7 @@ recovery.post("/", [
                         //see if queried hash matches current token
                         bcrypt.compare( req.body.token, token.tokenHash,  (err, result)=> {
                             if ( err ){                                
-                                return res.status(500).send(serverErrorStatement)
+                                return res.status(500).send(res.__("There was an error in your request. Please try again later."))
                             }   
                             count = count + 1
                             if ( result ) {//tokens match update password
@@ -103,22 +98,22 @@ recovery.post("/", [
                                 const user = require( req.nadminSettings.appRoot+"/"+req.nadminSettings.modelDirectory+"/"+req.nadminSettings.userModel ) 
                                 bcrypt.hash(req.body.password, 12, (err, hash) => {   
                                     if ( err ){                                
-                                        return res.status(500).send(serverErrorStatement)
+                                        return res.status(500).send(res.__("There was an error in your request. Please try again later."))
                                     }   
                                     //update users record
                                     user.model.findOneAndUpdate({ _id : token.user_id }, { passwordHash : hash }, (err, doc)=>{
                                         if ( err ){                                
-                                            return res.status(500).send(serverErrorStatement)
+                                            return res.status(500).send(res.__("There was an error in your request. Please try again later."))
                                         }   
                                         //delete reset token
                                         resetToken.model.deleteOne({ _id: token._id }, (err) => {
                                             if ( err ){                                
-                                                return res.status(500).send(serverErrorStatement)
+                                                return res.status(500).send(res.__("There was an error in your request. Please try again later."))
                                             }   
                                             res.render(__dirname + "/../views/message",{
                                                 error: false,
-                                                success:  successStatement ,
-                                                title: pageTitle,
+                                                success:  res.__("Password has been successfully changed") ,
+                                                title: res.__("Account Recovery"),
                                                 redirect: req.protocol + "://" + req.headers.host
                                             })       
                                         });
@@ -127,9 +122,9 @@ recovery.post("/", [
                             }
                             if(!foundToken && count >= tokens.length-1){
                                 res.render(__dirname + "/../views/message",{
-                                    error: errorStatement,
+                                    error: res.__("Invalid attempt at password reset, if you followed a link it may have expired"),
                                     success: false,
-                                    title: pageTitle,
+                                    title: res.__("Account Recovery"),
                                     redirect: req.protocol + "://" + req.headers.host
                                 })        
                             }   
@@ -138,9 +133,9 @@ recovery.post("/", [
                 }
                 else{//all tokens are expired
                     res.render(__dirname + "/../views/message",{
-                        error: errorStatement,
+                        error: res.__("Invalid attempt at password reset, if you followed a link it may have expired"),
                         success: false,
-                        title: pageTitle,
+                        title: res.__("Account Recovery"),
                         redirect: req.protocol + "://" + req.headers.host
                     })        
                 }   
@@ -152,7 +147,7 @@ recovery.post("/", [
         res.render(__dirname + "/../views/new-password",{
             error: error,
             success: false,
-            title: pageTitle,
+            title: res.__("Account Recovery"),
             token: req.body.token
         }) 
     }

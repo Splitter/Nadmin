@@ -6,7 +6,7 @@ html( lang="en" )
     body
         main.container(role='main')
             .card.card-container
-                p.profile-name-card Account recovery
+                p.profile-name-card #{__("Account Recovery")} 
                 i.fas.fa-user-shield.profile-img-card 
 
                 if(error)
@@ -16,8 +16,8 @@ html( lang="en" )
 
                 form.nadmin-form(action="/forgotpassword", method="post")
                     input(type="hidden", name="_csrf", value= csrfTokenGet())
-                    input#inputEmail.form-control(type='email', name='email' placeholder='Email address', required='', autofocus='')
-                    button.btn.btn-lg.btn-primary.btn-block.btn-signin(type='submit') Reset Now
+                    input#inputEmail.form-control(type='email', name='email' placeholder=__('Email Address'), required='', autofocus='')
+                    button.btn.btn-lg.btn-primary.btn-block.btn-signin(type='submit') #{__("Reset Now")} 
                 // /form
                 // /card-container
 

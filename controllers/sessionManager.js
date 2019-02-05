@@ -6,10 +6,6 @@ const   express       = require('express'),
 const   sessionManager= express.Router()
 sessionManager.destroy= express.Router()//second router for signing out
 
-//Error statements
-const   errorStatement       = "Credentials are incorrect, please check fields and try again",
-        serverErrorStatement = "There was an error in your request. Please try again later.",
-        pageTitle            = "Sign in"
 
 /**
  * Middleware function adds session data to res variable
@@ -36,9 +32,9 @@ sessionManager.init = (req, res, next)=>{
 sessionManager.csrfErrorCheck = ( err, req, res, next )=>{
     if(err.code == 'EBADCSRFTOKEN'){
         res.render(__dirname + "/views/message",{
-            error: "Session has expired or form has been tampered with.",
+            error: res.__("Session has expired or form has been tampered with."),
             success: false,
-            title: "Error",
+            title: res.__("Error"),
             redirect: req.protocol + "://" + req.headers.host
         }) 
     }
@@ -52,10 +48,10 @@ sessionManager.destroy.get('/',(req, res) =>{
     //destroy session
     //if logged in then allow logging out
     if(req.session.isLoggedIn()){
-        let success = "You have been successfully signed out"
+        let success = res.__("You have been successfully signed out")
         req.session.destroy((err) => {
             if ( err ){                                
-               return res.status(500).send(serverErrorStatement)
+               return res.status(500).send(res.__("There was an error in your request. Please try again later."))
             }
             res.render(__dirname + "/../views/message",{
                 errors: false,
@@ -66,12 +62,12 @@ sessionManager.destroy.get('/',(req, res) =>{
         })
     }
     else{ //Not logged in so no need to log out
-        error = "You are not logged in!"
+        error = res.__("You are not logged in!")
         let redirect = req.protocol + "://" + req.headers.host
         res.render(__dirname + "/../views/message",{
             errors: error,
             success: false,
-            title: pageTitle,
+            title: res.__("Sign in"),
             redirect: redirect
         })                
     }          
@@ -81,12 +77,12 @@ sessionManager.destroy.get('/',(req, res) =>{
 sessionManager.get('/', (req, res)=>{
     //if logged in then do not allow logging in again
     if(req.session.isLoggedIn()){
-        error = "You are already logged in!"
+        error = res.__("You are already logged in!")
         let redirect = req.protocol + "://" + req.headers.host
         res.render(__dirname + "/../views/message",{
             errors: error,
             success: false,
-            title: pageTitle,
+            title: res.__("Sign in"),
             redirect: redirect
         })
     }
@@ -103,12 +99,12 @@ sessionManager.post('/',[
 ], (req, res)=>{
     //if logged in then do not allow logging in again
     if(req.session.isLoggedIn()){
-        error = "You are already logged in!"
+        error = res.__("You are already logged in!")
         let redirect = req.protocol + "://" + req.headers.host
         res.render(__dirname + "/../views/message",{
             errors: error,
             success: false,
-            title: pageTitle,
+            title: res.__("Sign in"),
             redirect: redirect
         })
     }
@@ -121,25 +117,25 @@ sessionManager.post('/',[
             user.model.findOne( { email : req.body.email }, (err, userInfo) => {
                 
                 if ( err ){                                
-                    return res.status(500).send(serverErrorStatement)
+                    return res.status(500).send(res.__("There was an error in your request. Please try again later."))
                 }
                 
                 if (!userInfo){//user with email does not exist
-                    res.render(__dirname + "/../views/login",{title: pageTitle,errors:[errorStatement]})
+                    res.render(__dirname + "/../views/login",{title: res.__("Sign in"),errors:[errorStatement]})
                 }                
                 else{//user exists
                     //compare password to users stored hashed password
                     bcrypt.compare( req.body.password, userInfo.passwordHash, (err, result) => {
                                     
                         if ( err ){                                
-                            return res.status(500).send(serverErrorStatement)
+                            return res.status(500).send(res.__("There was an error in your request. Please try again later."))
                         }
                         if ( result ) {//correct password
                             userInfo.passwordHash = null; //delete hash before saving user info in session
                             //create new session apon signing in
                             req.session.regenerate( (err) => {
                                 if ( err ){                                
-                                    return res.status(500).send(serverErrorStatement)
+                                    return res.status(500).send(res.__("There was an error in your request. Please try again later."))
                                 }
                                 else{       
                                     req.session.userInfo = userInfo;
@@ -150,18 +146,18 @@ sessionManager.post('/',[
                                         req.session.cookie.maxAge = halfHour
                                     }
                                     //render success message then redirect to app root
-                                    let success = "You have successfully signed in!"
+                                    let success = res.__("You have successfully signed in!")
                                     req.brute.reset()//reset rate limiter
                                     res.render(__dirname + "/../views/login",{
                                         errors: false,
                                         success: success,
-                                        title: pageTitle,
+                                        title: res.__("Sign in"),
                                         redirect: req.protocol + "://" + req.headers.host
                                     })
                                 }
                             })         
                         } else {//wrong password      
-                            res.render(__dirname + "/../views/login",{title: pageTitle,errors:[errorStatement]})
+                            res.render(__dirname + "/../views/login",{title: res.__("Sign in"),errors:[errorStatement]})
                         }
                     })
                 }
@@ -172,7 +168,7 @@ sessionManager.post('/',[
             for(i=0 ; i < errors.length; i++){
                 errorList.push(errors[i].param +" : "+errors[i].msg);
             }
-            res.render(__dirname + "/../views/login",{title: pageTitle,errors:errorList})
+            res.render(__dirname + "/../views/login",{title: res.__("Sign in"),errors:errorList})
         }
     }
 })

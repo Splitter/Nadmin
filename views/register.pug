@@ -6,7 +6,7 @@ html( lang="en" )
     body
         main.container(role='main')
             .card.card-container
-                p.profile-name-card Register
+                p.profile-name-card #{__("Register")}
                 i.fas.fa-user-cog.profile-img-card
                     
                 if(errors)
@@ -19,15 +19,15 @@ html( lang="en" )
                     div.success-box= success
                 form.nadmin-form(action="/register", method="post")
                     input(type="hidden", name="_csrf", value= csrfTokenGet())
-                    input#displayname.form-control(type='text', name='displayname', placeholder='Your Name', required='', autofocus='')
-                    input#email.form-control(type='email', name='email', placeholder='Email Address', required='', autofocus='')
-                    input#confirmEmail.form-control(type='email', name='confirmEmail', placeholder='Confirm Email', required='')
-                    input#password.form-control(type='password', name='password', placeholder='Password', required='')
-                    input#confirmPassword.form-control(type='password', name='confirmPassword', placeholder='Confirm Password', required='')
-                    button.btn.btn-lg.btn-primary.btn-block.btn-signin(type='submit') Register
+                    input#displayname.form-control(type='text', name='displayname', placeholder=__('Your Name'), required='', autofocus='')
+                    input#email.form-control(type='email', name='email', placeholder=__('Email Address'), required='', autofocus='')
+                    input#confirmEmail.form-control(type='email', name='confirmEmail', placeholder=__('Confirm Email'), required='')
+                    input#password.form-control(type='password', name='password', placeholder=__('Password'), required='')
+                    input#confirmPassword.form-control(type='password', name='confirmPassword', placeholder=__('Confirm Password'), required='')
+                    button.btn.btn-lg.btn-primary.btn-block.btn-signin(type='submit') #{__("Register")}
                 // /form
                 a.form-link(href='/login')
-                    | Already a member? Login here
+                    | #{__("Already a member? Login here")}
             // /card-container
 
         // /.container

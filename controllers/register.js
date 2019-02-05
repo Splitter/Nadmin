@@ -5,24 +5,22 @@ const   express    = require('express'),
 
 const   register   = express.Router()
 
-const loggedInStatement = "You are already logged in!",
-      pageTitle         = "Register"
 
 //Get: show form
 register.get('/', (req, res)=>{
     //if logged in then do not allow registration
     if(req.session.isLoggedIn()){
-        error = loggedInStatement
+        error = res.__("You are already logged in!")
         let redirect = req.protocol + "://" + req.headers.host
         res.render(__dirname + "/../views/message",{
             errors: error,
             success: false,
-            title: pageTitle,
+            title: res.__("Register"),
             redirect: redirect
         })
     }
     else{ //new user so allow registration
-        res.render(__dirname + "/../views/register", {title: pageTitle})
+        res.render(__dirname + "/../views/register", {title: res.__("Register")})
     }
 })
 
@@ -37,12 +35,12 @@ register.post('/',[
 ], (req, res)=>{
     //if logged in then do not allow registration
     if(req.session.isLoggedIn()){
-        error = loggedInStatement
+        error = res.__("You are already logged in!")
         let redirect = req.protocol + "://" + req.headers.host
         res.render(__dirname + "/../views/message",{
             errors: error,
             success: false,
-            title: pageTitle,
+            title: res.__("Register"),
             redirect: redirect
         })
     }
@@ -57,10 +55,10 @@ register.post('/',[
         if(!errors){
             //make sure emails match
             const mEmail = ( req.body.email == req.body.confirmEmail ) ? req.body.email : null;
-            if(!mEmail){ errorList.push( "Email and Confirmation email do not match" ) }
+            if(!mEmail){ errorList.push( res.__("Email and Confirmation email do not match") ) }
             //make sure passwords match
             const password = ( req.body.password == req.body.confirmPassword ) ? req.body.password : null;
-            if(!password){ errorList.push( "Password and Confirmation password do not match" ) }
+            if(!password){ errorList.push( res.__("Password and Confirmation password do not match") ) }
 
             //get User model
             const user = require( req.nadminSettings.appRoot+"/"+req.nadminSettings.modelDirectory+"/"+req.nadminSettings.userModel )     
@@ -68,20 +66,20 @@ register.post('/',[
                 user.model.find({ displayName : req.body.displayname }, (err, docs) => {
                     if (docs.length){ 
                         //username is already in use so add to errorList      
-                        errorList.push("Username is already taken")
+                        errorList.push(res.__("Username is already taken"))
                     }
                     //make sure email not already in use
                     user.model.find({ email : mEmail }, (err, mdocs) => {
                         //email is in use
                         if (mdocs.length){
                             //username is already in use so add to errorList   
-                            errorList.push("Email is already in use")
+                            errorList.push(res.__("Email is already in use"))
                         }                
                         //errors so re-render registration form with errors
                         if(errorList.length > 0){
                             res.render(__dirname + "/../views/register", {
                                 errors: errorList,
-                                title: pageTitle,
+                                title: res.__("Register"),
                                 success: success
                             })
                         }// no error so attempt save new user 
@@ -101,12 +99,12 @@ register.post('/',[
                                 //save user model
                                 userModel.save().then( () => {
                                     //render registration page with success message and redirect to home page after N seconds
-                                    success = "Successfully registered!"
+                                    success = res.__("Successfully registered!")
                                     let redirect = req.protocol + "://" + req.headers.host
                                     res.render(__dirname + "/../views/register", {
                                         errors: false,
                                         success: success,
-                                        title: pageTitle,
+                                        title: res.__("Register"),
                                         redirect: redirect
                                     })                                
                                 });        
@@ -118,7 +116,7 @@ register.post('/',[
             else{//Fields do not match so show error messages
                 res.render(__dirname + "/../views/register", {
                     errors: errorList,
-                    title: pageTitle,
+                    title: res.__("Register"),
                     success: success
                 })
             }
@@ -129,7 +127,7 @@ register.post('/',[
             }
             res.render(__dirname + "/../views/register", {
                 errors: errorList,
-                title: pageTitle,
+                title: res.__("Register"),
                 success: success
             })
         }
