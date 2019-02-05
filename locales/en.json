@@ -36,5 +36,6 @@
     "Email Address" : "Email Address",
     "Confirm Email" : "Confirm Email",
     "Reset Now" : "Reset Now",
-    "Sign In" : "Sign In"
+	"Sign In" : "Sign In",
+	"ERROR: no page models available" : "ERROR: no page models available"
 }
